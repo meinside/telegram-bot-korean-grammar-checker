@@ -1,10 +1,8 @@
 # 한글 맞춤법 검사 Telegram Bot
 
-이 봇은 Daum Kakao Corp.의 [맞춤법 검사 API](https://developers.daum.net/services/apis/grammar-checker/v1/check.json)를 활용해
+이 봇은 Daum Kakao Corp.의 [맞춤법 검사 API](https://developers.daum.net/services/apis/grammar-checker/v1/check.json)를 활용, 입력된 문장에 대해 맞춤법 검사를 수행하여 그 결과를 응답해주는 Go로 개발된 Telegram Bot입니다.
 
-입력된 문장에 대해 맞춤법 검사를 수행, 그 결과를 응답해주는
-
-Go로 개발된 Telegram Bot입니다.
+![screen shot 2016-08-17 at 15 31 56](https://cloud.githubusercontent.com/assets/185988/17726738/df9505fe-648f-11e6-9677-a28b76eb8bec.png)
 
 ## 설치
 
@@ -51,7 +49,28 @@ $ cp config.json.sample config.json
 $ ./telegram-bot-korean-grammar-checker
 ```
 
-![screen shot 2016-08-17 at 15 31 56](https://cloud.githubusercontent.com/assets/185988/17726738/df9505fe-648f-11e6-9677-a28b76eb8bec.png)
+### 서비스로 실행 (linux systemd)
+
+```bash
+$ sudo cp systemd/telegram-bot-korean-grammar-checker.service /lib/systemd/system/
+$ sudo vi /lib/systemd/system/telegram-bot-korean-grammar-checker.service
+```
+
+**User**, **Group**, **WorkingDirectory**, **ExecStart** 값을 각각 환경에 맞게 수정합니다.
+
+다음의 명령으로 부팅 시 자동으로 서비스로 실행됩니다:
+
+```bash
+$ sudo systemctl enable telegram-bot-korean-grammar-checker.service
+```
+
+서비스 시작/중단은 다음과 같습니다:
+
+```bash
+$ sudo systemctl start telegram-bot-korean-grammar-checker.service
+$ sudo systemctl restart telegram-bot-korean-grammar-checker.service
+$ sudo systemctl stop telegram-bot-korean-grammar-checker.service
+```
 
 ## License
 
