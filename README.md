@@ -51,6 +51,8 @@ $ cp config.json.sample config.json
 $ ./telegram-bot-korean-grammar-checker
 ```
 
+![screen shot 2016-08-17 at 15 31 56](https://cloud.githubusercontent.com/assets/185988/17726738/df9505fe-648f-11e6-9677-a28b76eb8bec.png)
+
 ## License
 
 MIT
