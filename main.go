@@ -104,6 +104,11 @@ func buildResultMessage(result checkResult) string {
 
 	for _, s := range result.Sentences {
 		guide = ""
+
+		if len(s.Sentence) <= 0 { // skip empty lines
+			continue
+		}
+
 		corrected = s.Sentence
 
 		for _, r := range s.Result {
