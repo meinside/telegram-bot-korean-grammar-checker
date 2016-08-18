@@ -5,15 +5,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
-	"strings"
 
 	bot "github.com/meinside/telegram-bot-go"
+
+	"github.com/meinside/telegram-bot-korean-grammar-checker/apis/daum"
 )
 
 const (
-	ConfigFilename                 = "config.json"
-	DaumKoreanGrammarCheckerApiUrl = "https://apis.daum.net/grammar-checker/v1/check.json"
+	ConfigFilename = "config.json"
 
 	CommandStart   = "/start"
 	WelcomeMessage = "맞춤법을 검사할 문장을 입력해 주세요."
@@ -26,110 +25,8 @@ type config struct {
 	IsVerbose                     bool   `json:"is_verbose"`
 }
 
-// api result
-type checkResult struct {
-	Sentences []struct {
-		Sentence string `json:"sentence"`
-		Result   []struct {
-			Input   string   `json:"input"`
-			Output  string   `json:"output"`
-			Etype   string   `json:"etype"`
-			Help    []string `json:"help,omitempty"`
-			HelpMo  []string `json:"help_mo,omitempty"`
-			Example []string `json:"example,omitempty"`
-		} `json:"result"`
-	} `json:"sentences"`
-
-	// when error
-	ErrorType string `json:"errorType,omitempty"`
-	Message   string `json:"message,omitempty"`
-}
-
-// check grammar of given text
-//
-// https://developers.daum.net/services/apis/grammar-checker/v1/check.json
-func checkGrammar(apiKey, text string) (checkResult, error) {
-	client := &http.Client{}
-
-	var err error
-	var req *http.Request
-	var res *http.Response
-	if req, err = http.NewRequest("GET", DaumKoreanGrammarCheckerApiUrl, nil); err == nil {
-		q := req.URL.Query()
-		q.Add("apikey", apiKey)
-		q.Add("query", text)
-		q.Add("help", "on")
-		req.URL.RawQuery = q.Encode()
-
-		if res, err = client.Do(req); err == nil {
-			defer res.Body.Close()
-
-			var bytes []byte
-			if bytes, err = ioutil.ReadAll(res.Body); err == nil {
-				var result checkResult
-				if err = json.Unmarshal(bytes, &result); err == nil {
-					if result.ErrorType == "" {
-						return result, nil
-					} else {
-						err = fmt.Errorf("%s - %s", result.ErrorType, result.Message)
-					}
-				}
-			}
-		}
-	}
-
-	return checkResult{}, err
-}
-
-// build up result message string
-/*
-  * example:
-
-  ► 이 대화의 목적은
-
-  ► 내가 뭐라꼬 그랫는지 ⇨ 내가 뭐라고 그랬는지
-  ▸ 뭐라꼬 ⇐ '뭐라꼬'는 '뭐라고'의 방언입니다.
-  ▸ 그랫는지 ⇐ '그랫는지'의 옳은 표기는 '그랬는지'입니다.
-
-  ► 이놈의 봇시키가 알지 모를지
-  ▸ 봇시키가 ⇐ 맞춤법 오류가 의심되는 구절입니다.
-
-  ► 그냥 테스트해 보는 거여따. ⇨ 그냥 테스트해 보는 거였다.
-  ▸ 거여따. ⇐ 올바르지 않은 어미의 사용입니다. '거였다.'로 고쳐 씁니다.
-*/
-func buildResultMessage(result checkResult) string {
-	var message string
-
-	var guide, corrected string
-
-	for _, s := range result.Sentences {
-		guide = ""
-
-		if len(s.Sentence) <= 0 { // skip empty lines
-			continue
-		}
-
-		corrected = s.Sentence
-
-		for _, r := range s.Result {
-			if r.Etype != "no_error" {
-				guide += fmt.Sprintf("▸ %s ⇐ %s\n", r.Input, strings.Join(r.Help, " "))
-
-				corrected = strings.Replace(corrected, r.Input, r.Output, 1)
-			}
-		}
-
-		if corrected == s.Sentence { // no correction
-			message += fmt.Sprintf("► _%s_\n%s\n", s.Sentence, guide)
-		} else {
-			message += fmt.Sprintf("► _%s_ ⇨ *%s*\n%s\n", s.Sentence, corrected, guide)
-		}
-	}
-
-	return message
-}
-
 func main() {
+	// read config file
 	var conf config
 	if file, err := ioutil.ReadFile(ConfigFilename); err == nil {
 		if err := json.Unmarshal(file, &conf); err != nil {
@@ -144,10 +41,9 @@ func main() {
 		panic(err)
 	}
 
+	// setup telegram bot
 	client := bot.NewClient(conf.TelegramApiToken)
 	client.Verbose = conf.IsVerbose
-
-	// get info about this bot
 	if me := client.GetMe(); me.Ok {
 		log.Printf("Bot information: @%s (%s)\n", *me.Result.Username, *me.Result.FirstName)
 
@@ -165,8 +61,8 @@ func main() {
 							if *update.Message.Text == CommandStart { // skip /start command
 								message = WelcomeMessage
 							} else {
-								if result, err := checkGrammar(conf.DaumApiKey, *update.Message.Text); err == nil {
-									message = buildResultMessage(result)
+								if result, err := daum.CheckGrammar(conf.DaumApiKey, *update.Message.Text); err == nil {
+									message = daum.BuildResultMessage(result)
 								} else {
 									message = fmt.Sprintf("API 호출 오류: %s", err)
 
@@ -177,12 +73,12 @@ func main() {
 							message = WelcomeMessage
 						}
 
-						// send message back (with markup support)
+						// send message back
 						if sent := b.SendMessage(
 							update.Message.Chat.Id,
 							&message,
 							map[string]interface{}{
-								"parse_mode": bot.ParseModeMarkdown,
+								"parse_mode": bot.ParseModeMarkdown, // with markup support
 							},
 						); !sent.Ok {
 							log.Printf("*** failed to send message: %s\n", *sent.Description)
