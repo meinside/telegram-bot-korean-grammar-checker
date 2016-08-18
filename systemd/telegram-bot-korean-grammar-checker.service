@@ -1,0 +1,17 @@
+[Unit]
+Description=Korean Grammar Checker Telegram Bot
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+User=some_user
+Group=some_user
+WorkingDirectory=/path/to/telegram-bot-korean-grammar-checker
+ExecStart=/path/to/telegram-bot-korean-grammar-checker/telegram-bot-korean-grammar-checker
+Restart=always
+RestartSec=5
+Environment=
+
+[Install]
+WantedBy=multi-user.target

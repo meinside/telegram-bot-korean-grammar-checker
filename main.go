@@ -85,17 +85,17 @@ func checkGrammar(apiKey, text string) (checkResult, error) {
 /*
   * example:
 
-  > 이 대화의 목적은
+  ► 이 대화의 목적은
 
-  > 내가 뭐라꼬 그랫는지 ⇨ 내가 뭐라고 그랬는지
-  뭐라꼬 ⇐ '뭐라꼬'는 '뭐라고'의 방언입니다.
-  그랫는지 ⇐ '그랫는지'의 옳은 표기는 '그랬는지'입니다.
+  ► 내가 뭐라꼬 그랫는지 ⇨ 내가 뭐라고 그랬는지
+  ▸ 뭐라꼬 ⇐ '뭐라꼬'는 '뭐라고'의 방언입니다.
+  ▸ 그랫는지 ⇐ '그랫는지'의 옳은 표기는 '그랬는지'입니다.
 
-  > 이놈의 봇시키가 알지 모를지
-  봇시키가 ⇐ 맞춤법 오류가 의심되는 구절입니다.
+  ► 이놈의 봇시키가 알지 모를지
+  ▸ 봇시키가 ⇐ 맞춤법 오류가 의심되는 구절입니다.
 
-  > 그냥 테스트해 보는 거여따. ⇨ 그냥 테스트해 보는 거였다.
-  거여따. ⇐ 올바르지 않은 어미의 사용입니다. '거였다.'로 고쳐 씁니다.
+  ► 그냥 테스트해 보는 거여따. ⇨ 그냥 테스트해 보는 거였다.
+  ▸ 거여따. ⇐ 올바르지 않은 어미의 사용입니다. '거였다.'로 고쳐 씁니다.
 */
 func buildResultMessage(result checkResult) string {
 	var message string
@@ -108,16 +108,16 @@ func buildResultMessage(result checkResult) string {
 
 		for _, r := range s.Result {
 			if r.Etype != "no_error" {
-				guide += fmt.Sprintf("%s ⇐ %s\n", r.Input, strings.Join(r.Help, " "))
+				guide += fmt.Sprintf("▸ %s ⇐ %s\n", r.Input, strings.Join(r.Help, " "))
 
 				corrected = strings.Replace(corrected, r.Input, r.Output, 1)
 			}
 		}
 
 		if corrected == s.Sentence { // no correction
-			message += fmt.Sprintf("*>* _%s_\n%s\n", s.Sentence, guide)
+			message += fmt.Sprintf("► _%s_\n%s\n", s.Sentence, guide)
 		} else {
-			message += fmt.Sprintf("*>* _%s_ ⇨ *%s*\n%s\n", s.Sentence, corrected, guide)
+			message += fmt.Sprintf("► _%s_ ⇨ *%s*\n%s\n", s.Sentence, corrected, guide)
 		}
 	}
 
