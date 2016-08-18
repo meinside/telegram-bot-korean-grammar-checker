@@ -74,9 +74,7 @@ $ sudo systemctl stop telegram-bot-korean-grammar-checker.service
 
 ## 활용 예
 
-* [https://telegram.me/KoreanGrammarCheckerBot](@KoreanGrammarCheckerBot): 개인 서버에서 서비스 중 **(예고 없이 중단될 수 있으며, 그 경우 응답이 없을 수 있음)**
-
-![screen shot 2016-08-17 at 15 31 56](https://cloud.githubusercontent.com/assets/185988/17726738/df9505fe-648f-11e6-9677-a28b76eb8bec.png)
+* [@KoreanGrammarCheckerBot](https://telegram.me/KoreanGrammarCheckerBot): 개인 서버에서 서비스 중 **(예고 없이 중단될 수 있으며, 그 경우 응답이 없을 수 있음)**
 
 ## TODO
 
