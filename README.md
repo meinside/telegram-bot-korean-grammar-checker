@@ -1,5 +1,7 @@
 # 한글 맞춤법 검사 Telegram Bot
 
+_(아래 API는 deprecate 되어 더 이상 새로 사용이 불가능합니다. 이미 쓰고 있던 경우는 2016년 10월 11일 현재까지는 잘 되는 듯 합니다.)_
+
 이 봇은 Daum Kakao Corp.의 [맞춤법 검사 API](https://developers.daum.net/services/apis/grammar-checker/v1/check.json)를 활용, 입력된 문장에 대해 맞춤법 검사를 수행하여 그 결과를 응답해주는 Go로 개발된 Telegram Bot입니다.
 
 ![screen shot 2016-08-17 at 15 31 56](https://cloud.githubusercontent.com/assets/185988/17726738/df9505fe-648f-11e6-9677-a28b76eb8bec.png)
