@@ -11,8 +11,8 @@ _(아래 API는 deprecate 되어 더 이상 새로 사용이 불가능합니다.
 설치를 위해 Go가 먼저 설치/설정되어 있어야 합니다.
 
 ```
-$ git clone https://github.com/meinside/telegram-bot-korean-grammar-checker.git
-$ cd telegram-bot-korean-grammar-checker
+$ go get -d github.com/meinside/telegram-bot-korean-grammar-checker
+$ cd $GOPATH/src/github.com/meinside/telegram-bot-korean-grammar-checker
 $ go build
 ```
 
