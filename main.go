@@ -9,9 +9,13 @@ import (
 	bot "github.com/meinside/telegram-bot-go"
 
 	"github.com/meinside/telegram-bot-korean-grammar-checker/apis/daum"
+
+	"github.com/meinside/loggly-go"
 )
 
 const (
+	AppName = "KoreanGrammarCheckerBot"
+
 	ConfigFilename = "config.json"
 
 	CommandStart   = "/start"
@@ -22,8 +26,18 @@ type config struct {
 	TelegramApiToken              string `json:"telegram_api_token"`
 	DaumApiKey                    string `json:"daum_api_key"`
 	TelegramUpdateIntervalSeconds int    `json:"monitor_interval"`
+	LogglyToken                   string `json:"loggly_token,omitempty"`
 	IsVerbose                     bool   `json:"is_verbose"`
 }
+
+type LogglyLog struct {
+	Application string      `json:"app"`
+	Severity    string      `json:"severity"`
+	Message     string      `json:"message,omitempty"`
+	Object      interface{} `json:"obj,omitempty"`
+}
+
+var logger *loggly.Loggly
 
 func main() {
 	// read config file
@@ -32,9 +46,14 @@ func main() {
 		if err := json.Unmarshal(file, &conf); err != nil {
 			panic(err)
 		} else {
-			// XXX - check conf values
 			if conf.TelegramUpdateIntervalSeconds <= 0 {
 				conf.TelegramUpdateIntervalSeconds = 1
+			}
+
+			if conf.LogglyToken != "" {
+				logger = loggly.New(conf.LogglyToken)
+			} else {
+				logger = nil
 			}
 		}
 	} else {
@@ -45,7 +64,7 @@ func main() {
 	client := bot.NewClient(conf.TelegramApiToken)
 	client.Verbose = conf.IsVerbose
 	if me := client.GetMe(); me.Ok {
-		log.Printf("Bot information: @%s (%s)\n", *me.Result.Username, *me.Result.FirstName)
+		logMessage(fmt.Sprintf("Starting bot: @%s (%s)", *me.Result.Username, *me.Result.FirstName))
 
 		// delete webhook (getting updates will not work when wehbook is set up)
 		if unhooked := client.DeleteWebhook(); unhooked.Ok {
@@ -56,17 +75,26 @@ func main() {
 						// 'is typing...'
 						b.SendChatAction(update.Message.Chat.Id, bot.ChatActionTyping)
 
-						var message string
+						var message, username string
 						if update.Message.HasText() {
 							if *update.Message.Text == CommandStart { // skip /start command
 								message = WelcomeMessage
 							} else {
+								// log request
+								if update.Message.From.Username == nil {
+									username = *update.Message.From.Username
+								} else {
+									username = *update.Message.From.FirstName
+								}
+								logRequest(*update.Message.Text, username)
+
+								// check grammar
 								if result, err := daum.CheckGrammar(conf.DaumApiKey, *update.Message.Text); err == nil {
 									message = daum.BuildResultMessage(result)
 								} else {
 									message = fmt.Sprintf("API 호출 오류: %s", err)
 
-									log.Printf("*** failed to call api: %s", err)
+									logError(fmt.Sprintf("Failed to call API: %s", err))
 								}
 							}
 						} else {
@@ -81,11 +109,11 @@ func main() {
 								"parse_mode": bot.ParseModeMarkdown, // with markup support
 							},
 						); !sent.Ok {
-							log.Printf("*** failed to send message: %s\n", *sent.Description)
+							logError(fmt.Sprintf("Failed to send message: %s", *sent.Description))
 						}
 					}
 				} else {
-					log.Printf("*** error while receiving update (%s)\n", err.Error())
+					logError(fmt.Sprintf("Error while receiving update: %s", err))
 				}
 			})
 		} else {
@@ -93,5 +121,45 @@ func main() {
 		}
 	} else {
 		panic("failed to get info of the bot")
+	}
+}
+
+func logMessage(message string) {
+	log.Println(message)
+
+	if logger != nil {
+		logger.Log(LogglyLog{
+			Application: AppName,
+			Severity:    "Log",
+			Message:     message,
+		})
+	}
+}
+
+func logError(message string) {
+	log.Println(message)
+
+	if logger != nil {
+		logger.Log(LogglyLog{
+			Application: AppName,
+			Severity:    "Error",
+			Message:     message,
+		})
+	}
+}
+
+func logRequest(text, username string) {
+	if logger != nil {
+		logger.Log(LogglyLog{
+			Application: AppName,
+			Severity:    "Verbose",
+			Object: struct {
+				Username string `json:"username"`
+				Text     string `json:"text"`
+			}{
+				Username: username,
+				Text:     text,
+			},
+		})
 	}
 }
