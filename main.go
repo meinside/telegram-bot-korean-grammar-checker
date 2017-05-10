@@ -82,9 +82,9 @@ func main() {
 							} else {
 								// log request
 								if update.Message.From.Username == nil {
-									username = *update.Message.From.Username
-								} else {
 									username = *update.Message.From.FirstName
+								} else {
+									username = *update.Message.From.Username
 								}
 								logRequest(*update.Message.Text, username)
 
