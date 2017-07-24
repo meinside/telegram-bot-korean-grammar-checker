@@ -64,7 +64,7 @@ func main() {
 	client := bot.NewClient(conf.TelegramApiToken)
 	client.Verbose = conf.IsVerbose
 	if me := client.GetMe(); me.Ok {
-		logMessage(fmt.Sprintf("Starting bot: @%s (%s)", *me.Result.Username, *me.Result.FirstName))
+		logMessage(fmt.Sprintf("Starting bot: @%s (%s)", *me.Result.Username, me.Result.FirstName))
 
 		// delete webhook (getting updates will not work when wehbook is set up)
 		if unhooked := client.DeleteWebhook(); unhooked.Ok {
@@ -82,7 +82,7 @@ func main() {
 							} else {
 								// log request
 								if update.Message.From.Username == nil {
-									username = *update.Message.From.FirstName
+									username = update.Message.From.FirstName
 								} else {
 									username = *update.Message.From.Username
 								}
@@ -104,7 +104,7 @@ func main() {
 						// send message back
 						if sent := b.SendMessage(
 							update.Message.Chat.Id,
-							&message,
+							message,
 							map[string]interface{}{
 								"parse_mode": bot.ParseModeMarkdown, // with markup support
 							},
