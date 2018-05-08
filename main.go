@@ -14,12 +14,12 @@ import (
 )
 
 const (
-	AppName = "KoreanGrammarCheckerBot"
+	appName = "KoreanGrammarCheckerBot"
 
-	ConfigFilename = "config.json"
+	configFilename = "config.json"
 
-	CommandStart   = "/start"
-	WelcomeMessage = "맞춤법을 검사할 문장을 입력해 주세요."
+	commandStart   = "/start"
+	welcomeMessage = "맞춤법을 검사할 문장을 입력해 주세요."
 )
 
 type config struct {
@@ -42,7 +42,7 @@ var logger *loggly.Loggly
 func main() {
 	// read config file
 	var conf config
-	if file, err := ioutil.ReadFile(ConfigFilename); err == nil {
+	if file, err := ioutil.ReadFile(configFilename); err == nil {
 		if err := json.Unmarshal(file, &conf); err != nil {
 			panic(err)
 		} else {
@@ -73,12 +73,12 @@ func main() {
 				if err == nil {
 					if update.HasMessage() {
 						// 'is typing...'
-						b.SendChatAction(update.Message.Chat.Id, bot.ChatActionTyping)
+						b.SendChatAction(update.Message.Chat.ID, bot.ChatActionTyping)
 
 						var message, username string
 						if update.Message.HasText() {
-							if *update.Message.Text == CommandStart { // skip /start command
-								message = WelcomeMessage
+							if *update.Message.Text == commandStart { // skip /start command
+								message = welcomeMessage
 							} else {
 								// log request
 								if update.Message.From.Username == nil {
@@ -98,12 +98,12 @@ func main() {
 								}
 							}
 						} else {
-							message = WelcomeMessage
+							message = welcomeMessage
 						}
 
 						// send message back
 						if sent := b.SendMessage(
-							update.Message.Chat.Id,
+							update.Message.Chat.ID,
 							message,
 							map[string]interface{}{
 								"parse_mode": bot.ParseModeMarkdown, // with markup support
@@ -129,7 +129,7 @@ func logMessage(message string) {
 
 	if logger != nil {
 		logger.Log(LogglyLog{
-			Application: AppName,
+			Application: appName,
 			Severity:    "Log",
 			Message:     message,
 		})
@@ -141,7 +141,7 @@ func logError(message string) {
 
 	if logger != nil {
 		logger.Log(LogglyLog{
-			Application: AppName,
+			Application: appName,
 			Severity:    "Error",
 			Message:     message,
 		})
@@ -151,7 +151,7 @@ func logError(message string) {
 func logRequest(text, username string) {
 	if logger != nil {
 		logger.Log(LogglyLog{
-			Application: AppName,
+			Application: appName,
 			Severity:    "Verbose",
 			Object: struct {
 				Username string `json:"username"`
