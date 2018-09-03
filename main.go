@@ -30,9 +30,10 @@ type config struct {
 	IsVerbose                     bool   `json:"is_verbose"`
 }
 
-type LogglyLog struct {
+type logglyLog struct {
 	Application string      `json:"app"`
 	Severity    string      `json:"severity"`
+	Timestamp   string      `json:"timestamp"`
 	Message     string      `json:"message,omitempty"`
 	Object      interface{} `json:"obj,omitempty"`
 }
@@ -128,9 +129,12 @@ func logMessage(message string) {
 	log.Println(message)
 
 	if logger != nil {
-		logger.Log(LogglyLog{
+		_, timestamp := logger.Timestamp()
+
+		logger.Log(logglyLog{
 			Application: appName,
 			Severity:    "Log",
+			Timestamp:   timestamp,
 			Message:     message,
 		})
 	}
@@ -140,9 +144,12 @@ func logError(message string) {
 	log.Println(message)
 
 	if logger != nil {
-		logger.Log(LogglyLog{
+		_, timestamp := logger.Timestamp()
+
+		logger.Log(logglyLog{
 			Application: appName,
 			Severity:    "Error",
+			Timestamp:   timestamp,
 			Message:     message,
 		})
 	}
@@ -150,9 +157,12 @@ func logError(message string) {
 
 func logRequest(text, username string) {
 	if logger != nil {
-		logger.Log(LogglyLog{
+		_, timestamp := logger.Timestamp()
+
+		logger.Log(logglyLog{
 			Application: appName,
 			Severity:    "Verbose",
+			Timestamp:   timestamp,
 			Object: struct {
 				Username string `json:"username"`
 				Text     string `json:"text"`
