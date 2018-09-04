@@ -106,9 +106,7 @@ func main() {
 						if sent := b.SendMessage(
 							update.Message.Chat.ID,
 							message,
-							map[string]interface{}{
-								"parse_mode": bot.ParseModeMarkdown, // with markup support
-							},
+							bot.OptionsSendMessage{}.SetParseMode(bot.ParseModeMarkdown), // with markup support
 						); !sent.Ok {
 							logError(fmt.Sprintf("Failed to send message: %s", *sent.Description))
 						}
