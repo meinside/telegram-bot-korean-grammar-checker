@@ -1,5 +1,7 @@
 # 한글 맞춤법 검사 Telegram Bot
 
+_(2019년 2월 27일 현재, HTTP 404 오류로 API가 더 이상 작동하지 않음)_
+
 _(아래 API는 deprecate 되어 더 이상 새로 사용이 불가능합니다. 이미 쓰고 있던 경우는 2016년 10월 11일 현재까지는 잘 되는 듯 합니다.)_
 
 이 봇은 Daum Kakao Corp.의 [맞춤법 검사 API](https://developers.daum.net/services/apis/grammar-checker/v1/check.json)를 활용, 입력된 문장에 대해 맞춤법 검사를 수행하여 그 결과를 응답해주는 Go로 개발된 Telegram Bot입니다.
@@ -75,6 +77,8 @@ $ sudo systemctl stop telegram-bot-korean-grammar-checker.service
 ```
 
 ## 활용 예
+
+_(2019년 2월 27일 현재, API가 작동하지 않아 봇도 서비스를 중단합니다)_
 
 * [@KoreanGrammarCheckerBot](https://telegram.me/KoreanGrammarCheckerBot): 개인 서버에서 서비스 중 **(예고 없이 중단될 수 있으며, 그 경우 응답이 없을 수 있음)**
 
